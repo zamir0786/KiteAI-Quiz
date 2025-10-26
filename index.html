@@ -1,556 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuizMaster - Test Your Knowledge</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kite AI QuizMaster</title>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+    .container {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 1rem;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      max-width: 600px;
+      width: 90%;
+    }
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px;
-            padding: 40px;
-            transition: all 0.3s ease;
-        }
+    h1 {
+      font-size: 1.8rem;
+      color: #6a11cb;
+      margin-bottom: 0.5rem;
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+    p {
+      color: #555;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
 
-        .logo {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+    button {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
-        .subtitle {
-            color: #666;
-            font-size: 1.1rem;
-        }
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
 
-        .quiz-section {
-            display: none;
-        }
+    .quiz-container {
+      display: none;
+    }
 
-        .quiz-section.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in;
-        }
+    .option {
+      background: #f7f7f7;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: 0.2s;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .option:hover {
+      background: #eceaff;
+      border-color: #6a11cb;
+    }
 
-        .question-counter {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #666;
-            font-size: 0.9rem;
-        }
+    .correct {
+      background-color: #c8e6c9;
+      border-color: #2e7d32;
+    }
 
-        .progress-bar {
-            height: 6px;
-            background: #e0e0e0;
-            border-radius: 3px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .question {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            border-left: 5px solid #667eea;
-        }
-
-        .question h3 {
-            color: #333;
-            font-size: 1.3rem;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .options {
-            display: grid;
-            gap: 12px;
-        }
-
-        .option {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 15px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .option:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .option.selected {
-            border-color: #667eea;
-            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-        }
-
-        .option.correct {
-            border-color: #4CAF50;
-            background: linear-gradient(45deg, rgba(76, 175, 80, 0.1), rgba(76, 175, 80, 0.2));
-            animation: correctPulse 0.6s ease;
-        }
-
-        .option.incorrect {
-            border-color: #f44336;
-            background: linear-gradient(45deg, rgba(244, 67, 54, 0.1), rgba(244, 67, 54, 0.2));
-            animation: incorrectShake 0.6s ease;
-        }
-
-        @keyframes correctPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        @keyframes incorrectShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .feedback {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: bold;
-            display: none;
-        }
-
-        .feedback.correct {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4CAF50;
-            border: 2px solid #4CAF50;
-        }
-
-        .feedback.incorrect {
-            background: rgba(244, 67, 54, 0.1);
-            color: #f44336;
-            border: 2px solid #f44336;
-        }
-
-        .buttons {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 0 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .start-screen {
-            text-align: center;
-        }
-
-        .start-screen h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-        }
-
-        .start-screen p {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
-        .results-screen {
-            text-align: center;
-        }
-
-        .score-circle {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            margin: 30px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            font-size: 2rem;
-            font-weight: bold;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .score-circle.excellent {
-            background: linear-gradient(45deg, #4CAF50, #8BC34A);
-        }
-
-        .score-circle.good {
-            background: linear-gradient(45deg, #FF9800, #FFC107);
-        }
-
-        .score-circle.average {
-            background: linear-gradient(45deg, #2196F3, #03A9F4);
-        }
-
-        .score-circle.poor {
-            background: linear-gradient(45deg, #f44336, #FF5722);
-        }
-
-        .score-text {
-            font-size: 0.8rem;
-            margin-top: 5px;
-        }
-
-        .results-message {
-            color: #333;
-            font-size: 1.3rem;
-            margin: 20px 0;
-        }
-
-        .results-breakdown {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-        }
-
-        .breakdown-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            font-size: 1.1rem;
-        }
-
-        .breakdown-item strong {
-            color: #333;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            
-            .logo {
-                font-size: 2rem;
-            }
-            
-            .option {
-                padding: 12px 15px;
-            }
-            
-            .score-circle {
-                width: 150px;
-                height: 150px;
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+    .wrong {
+      background-color: #ffcdd2;
+      border-color: #c62828;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">🧠 QuizMaster</div>
-            <div class="subtitle">Test Your Knowledge</div>
-        </div>
+  <div class="container start-container">
+    <h1>🪁 Kite AI QuizMaster</h1>
+    <p>Test Your Agentic Internet Knowledge</p>
+    <p>
+      How well do you understand the future of AI-native payments, trust, and
+      governance? Take this quiz and find out!
+    </p>
+    <button id="start-btn">Start Quiz</button>
+  </div>
 
-        <!-- Start Screen -->
-        <div id="start-screen" class="quiz-section active start-screen">
-            <h2>Welcome to QuizMaster!</h2>
-            <p>Test your knowledge with our interactive quiz. You'll get immediate feedback on each question and see your final score at the end.</p>
-            <div class="buttons">
-                <button class="btn" onclick="startQuiz()">Start Quiz</button>
-            </div>
-        </div>
+  <div class="container quiz-container">
+    <h2 id="question">Question text</h2>
+    <div id="options"></div>
+    <button id="next-btn" style="display: none;">Next</button>
+  </div>
 
-        <!-- Quiz Screen -->
-        <div id="quiz-screen" class="quiz-section">
-            <div class="question-counter">
-                <span id="current-question">1</span> of <span id="total-questions">10</span>
-            </div>
-            
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-            </div>
+  <div class="container result-container" style="display: none;">
+    <h2>Quiz Completed! 🎉</h2>
+    <p id="score"></p>
+    <button id="restart-btn">Restart</button>
+  </div>
 
-            <div class="question">
-                <h3 id="question-text"></h3>
-                <div class="options" id="options-container">
-                </div>
-            </div>
+  <script>
+    const quizData = [
+      {
+        question: "What is Kite AI's primary focus as a blockchain platform?",
+        options: [
+          "General-purpose DeFi lending protocols",
+          "Enabling AI agents with identity, trust, and scalable payments for the agentic internet",
+          "High-frequency trading for human users only",
+          "Centralized AI model hosting"
+        ],
+        correct: 2
+      },
+      {
+        question: "Which consensus mechanism does Kite AI use?",
+        options: [
+          "Proof of Stake (PoS)",
+          "Proof of Work (PoW)",
+          "Proof of Attributed Intelligence (PoAI)",
+          "Delegated Proof of Authority (DPoA)"
+        ],
+        correct: 3
+      },
+      {
+        question: "Kite AI is built on which blockchain ecosystem?",
+        options: ["Avalanche", "Ethereum", "Solana", "Polkadot"],
+        correct: 1
+      },
+      {
+        question: "What type of transactions will AI agents handle on Kite AI?",
+        options: [
+          "Real-time autonomous transactions",
+          "Batch-only payments",
+          "Manual user-verified transfers",
+          "Non-financial metadata transfers"
+        ],
+        correct: 1
+      },
+      {
+        question: "What does 'Agentic Internet' mean in Kite AI's vision?",
+        options: [
+          "An internet run entirely by humans",
+          "AI agents with autonomy, trust, and programmable payments",
+          "Web2 infrastructure for AI tools",
+          "Internet with no governance"
+        ],
+        correct: 2
+      }
+    ];
 
-            <div class="feedback" id="feedback"></div>
+    const startBtn = document.getElementById("start-btn");
+    const quizContainer = document.querySelector(".quiz-container");
+    const startContainer = document.querySelector(".start-container");
+    const resultContainer = document.querySelector(".result-container");
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const nextBtn = document.getElementById("next-btn");
+    const scoreEl = document.getElementById("score");
+    const restartBtn = document.getElementById("restart-btn");
 
-            <div class="buttons">
-                <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
-            </div>
-        </div>
+    let currentQuestion = 0;
+    let score = 0;
 
-        <!-- Results Screen -->
-        <div id="results-screen" class="quiz-section results-screen">
-            <h2>Quiz Complete!</h2>
-            
-            <div class="score-circle" id="score-circle">
-                <div id="score-percentage">0%</div>
-                <div class="score-text">Score</div>
-            </div>
+    startBtn.addEventListener("click", startQuiz);
 
-            <div class="results-message" id="results-message"></div>
+    function startQuiz() {
+      startContainer.style.display = "none";
+      quizContainer.style.display = "block";
+      loadQuestion();
+    }
 
-            <div class="results-breakdown">
-                <div class="breakdown-item">
-                    <span>Correct Answers:</span>
-                    <strong id="correct-count">0</strong>
-                </div>
-                <div class="breakdown-item">
-                    <span>Incorrect Answers:</span>
-                    <strong id="incorrect-count">0</strong>
-                </div>
-                <div class="breakdown-item">
-                    <span>Total Questions:</span>
-                    <strong id="total-count">0</strong>
-                </div>
-            </div>
+    function loadQuestion() {
+      const question = quizData[currentQuestion];
+      questionEl.textContent = question.question;
+      optionsEl.innerHTML = "";
 
-            <div class="buttons">
-                <button class="btn" onclick="restartQuiz()">Take Quiz Again</button>
-            </div>
-        </div>
-    </div>
+      question.options.forEach((option, i) => {
+        const div = document.createElement("div");
+        div.classList.add("option");
+        div.textContent = option;
+        div.addEventListener("click", () => selectOption(i));
+        optionsEl.appendChild(div);
+      });
+      nextBtn.style.display = "none";
+    }
 
-    <script>
-        // Quiz data
-        const quizData = [
-            {
-                question: "What is Kite AI's primary focus as a blockchain platform?",
-                options: ["General-purpose DeFi lending protocols", "Enabling AI agents with identity, trust, and scalable payments for the agentic internet", "High-frequency trading for human users only", "Centralized AI model hosting"],
-                correct: 2
-            },
-            {
-                question: "Which consensus mechanism does Kite AI use to ensure fair attribution of AI contributions across data, models, and agents?",
-                options: ["Proof of Stake (PoS)", "Proof of Work (PoW)", "Proof of Attributed Intelligence (PoAI)", "Delegated Proof of Authority (DPoA)"],
-                correct: 3
-            },
-            {
-                question: "What is the Kite Passport, a key identity feature in Kite AI?",
-                options: ["A physical hardware wallet for AI developers", "A programmable, DID-based system providing cryptographic verifiable identity for AI agents", "A temporary login token for testnet access", " A social media integration tool"],
-                correct: 2
-            },
-            {
-                question: "How does Kite AI support programmable governance for AI agents?",
-                options: ["By requiring manual human oversight for all transactions", " Through finely defined rules for permissions, spending limits, and usage constraints", "Via random assignment of roles without user input", "Exclusively for enterprise clients"],
-                correct: 2
-            },
-            {
-                question: "What enables autonomous payments in Kite AI's ecosystem?",
-                options: ["Native stablecoin transactions with low fees and high throughput for machine-to-machine interactions", "Fiat currency gateways only", "Credit card processing via third-party APIs", "Barter systems between agents"],
-                correct: 1
-            },
-            {
-                question: "Kite AI's architecture is built around what core principle to allow developer flexibility?",
-                options: ["Rigid, monolithic design", "Modularity, enabling independent adoption of components like base layer, SDKs, and marketplace", "Full centralization for faster deployment", "Exclusion of EVM compatibility"],
-                correct: 2
-            },
-            {
-                question: "What is the role of Kite Compute in Kite AI?",
-                options: ["A tool for social media scheduling", "Decentralized GPU grid for training and running AI models on distributed nodes, rewarding operators", "A simple file storage service", "Email automation for agents"],
-                correct: 2
-            },
-            {
-                question: "How does Kite AI integrate with the X402 payment system for AI agents?",
-                options: ["It ignores it for custom protocols", "By embedding payment logic into HTTP 402, allowing agents to send/receive money, verify payments, and keep records", "Only for human-initiated transfers", "Through offline batch processing"],
-                correct: 2
-            },
-            {
-                question: "What is the Kite AI Platform's marketplace feature?",
-                options: ["A physical auction house for hardware", "A discovery layer for listing, finding, and interacting with AI agents for services like shopping or data access", "A job board for human freelancers", "A news aggregator"],
-                correct: 2
-            },
-            {
-                question: "Which recent toolset did Kite AI launch to support DeFi and agent-native finance?",
-                options: ["A social networking app", "The DeFi Stack, including Faucet, KiteScan, Multisig, Swap, and Bridge for seamless on-chain activities", "A video editing suite", "A calendar app for events"],
-                correct: 2
-            }
-        ];
+    function selectOption(i) {
+      const question = quizData[currentQuestion];
+      const options = document.querySelectorAll(".option");
 
-        let currentQuestion = 0;
-        let score = 0;
-        let selectedOption = -1;
-        let quizCompleted = false;
+      options.forEach(opt => opt.style.pointerEvents = "none");
 
-        function startQuiz() {
-            document.getElementById('start-screen').classList.remove('active');
-            document.getElementById('quiz-screen').classList.add('active');
-            document.getElementById('total-questions').textContent = quizData.length;
-            loadQuestion();
-        }
+      // ✅ Adjusted here: +1 to match your 1-based index
+      if (i + 1 === question.correct) {
+        options[i].classList.add("correct");
+        score++;
+      } else {
+        options[i].classList.add("wrong");
+        options[question.correct - 1].classList.add("correct");
+      }
 
-        function loadQuestion() {
-            if (currentQuestion >= quizData.length) {
-                showResults();
-                return;
-            }
+      nextBtn.style.display = "inline-block";
+    }
 
-            const question = quizData[currentQuestion];
-            document.getElementById('current-question').textContent = currentQuestion + 1;
-            document.getElementById('question-text').textContent = question.question;
-            
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-            
-            question.options.forEach((option, index) => {
-                const optionElement = document.createElement('div');
-                optionElement.className = 'option';
-                optionElement.textContent = option;
-                optionElement.onclick = () => selectOption(index);
-                optionsContainer.appendChild(optionElement);
-            });
+    nextBtn.addEventListener("click", nextQuestion);
 
-            // Update progress bar
-            const progress = ((currentQuestion) / quizData.length) * 100;
-            document.getElementById('progress-fill').style.width = progress + '%';
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
 
-            // Reset UI
-            selectedOption = -1;
-            document.getElementById('next-btn').disabled = true;
-            document.getElementById('feedback').style.display = 'none';
-            document.getElementById('feedback').className = 'feedback';
-        }
+    function showResults() {
+      quizContainer.style.display = "none";
+      resultContainer.style.display = "block";
+      scoreEl.textContent = `Your Score: ${score} / ${quizData.length}`;
+    }
 
-        function selectOption(index) {
-            if (selectedOption !== -1) return; // Prevent multiple selections
-
-            selectedOption = index;
-            const options = document.querySelectorAll('.option');
-            const question = quizData[currentQuestion];
-            
-            // Show correct/incorrect feedback
-            options.forEach((option, i) => {
-                if (i === question.correct) {
-                    option.classList.add('correct');
-                } else if (i === selectedOption && i !== question.correct) {
-                    option.classList.add('incorrect');
-                }
-                option.style.pointerEvents = 'none';
-            });
-
-            // Update score and show feedback
-            const feedback = document.getElementById('feedback');
-            if (selectedOption === question.correct) {
-                score++;
-                feedback.textContent = '🎉 Correct! Well done!';
-                feedback.className = 'feedback correct';
-            } else {
-                feedback.textContent = `❌ Incorrect. The correct answer is: ${question.options[question.correct]}`;
-                feedback.className = 'feedback incorrect';
-            }
-            
-            feedback.style.display = 'block';
-            document.getElementById('next-btn').disabled = false;
-        }
-
-        function nextQuestion() {
-            currentQuestion++;
-            setTimeout(loadQuestion, 300); // Small delay for smooth transition
-        }
-
-        function showResults() {
-            document.getElementById('quiz-screen').classList.remove('active');
-            document.getElementById('results-screen').classList.add('active');
-            
-            const percentage = Math.round((score / quizData.length) * 100);
-            const scoreCircle = document.getElementById('score-circle');
-            
-            document.getElementById('score-percentage').textContent = percentage + '%';
-            document.getElementById('correct-count').textContent = score;
-            document.getElementById('incorrect-count').textContent = quizData.length - score;
-            document.getElementById('total-count').textContent = quizData.length;
-            
-            // Set score circle color and message based on performance
-            let message = '';
-            if (percentage >= 80) {
-                scoreCircle.className = 'score-circle excellent';
-                message = '🏆 Excellent! You\'re a quiz master!';
-            } else if (percentage >= 60) {
-                scoreCircle.className = 'score-circle good';
-                message = '👏 Good job! You did well!';
-            } else if (percentage >= 40) {
-                scoreCircle.className = 'score-circle average';
-                message = '👍 Not bad! Keep practicing!';
-            } else {
-                scoreCircle.className = 'score-circle poor';
-                message = '💪 Don\'t give up! Try again!';
-            }
-            
-            document.getElementById('results-message').textContent = message;
-        }
-
-        function restartQuiz() {
-            currentQuestion = 0;
-            score = 0;
-            selectedOption = -1;
-            document.getElementById('results-screen').classList.remove('active');
-            document.getElementById('start-screen').classList.add('active');
-        }
-    </script>
+    restartBtn.addEventListener("click", () => {
+      currentQuestion = 0;
+      score = 0;
+      resultContainer.style.display = "none";
+      startContainer.style.display = "block";
+    });
+  </script>
 </body>
 </html>
